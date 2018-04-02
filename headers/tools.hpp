@@ -1,38 +1,28 @@
-#ifndef TOOLS_H
-#define TOOLS_H
+#pragma once
 
 #include "matrix.hpp"
 #include <thread>
 
-class Tools{
-  public:
-    Tools(){}
-    Tools(unsigned int a,unsigned int b,unsigned int c,unsigned int d):m(new Matrix(a,b,c,d)){}
-    Tools(string presetName);
+using namespace std;
+
+class Tools {
+    public:
+    Tools(unsigned int a, unsigned int b, unsigned int c, unsigned int d) : m(new Matrix(a, b, c, d)) {}
+    Tools(Matrix *M) :m(M) {}
     ~Tools();
-    void defIterations(int x);
-    void learn(bool sElapsed = 0);
 
-    void tLearn(bool sElapsed);
-    void tJoin();
-    void tStop();
+    static Matrix* useLogicGate(double ff, double ft, double tf, double tt);
 
-    void addInputs(double value);
-    void addInputs(double *value[]);
-    void setMatrix(Matrix *newMatrix);
-    Matrix *getMatrix();
-    void makeCalc(bool ask, bool logic = false);
-    bool savePreset(string presetName, bool show = 0);
-    bool loadPreset(string fileDirectory);
-    bool saveFile(string fileName,bool show = 0);
-    bool loadFile(string fileName);
+    void learn(unsigned int iterations);
+    void logicCalc(bool logic = false);
     void printResult();
-    void setLogicGate(double a,double b,double c,double d);
-  private:
-    vector<double> input;
-    int iterations;
-    Matrix *m;
-    std::thread *mThread;
-};
 
-#endif // TOOLS_H
+    void setMatrix(Matrix *newMatrix);
+
+    Matrix *getMatrix();
+
+    static void final();
+
+    private:
+    Matrix * m;
+};

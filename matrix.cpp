@@ -7,263 +7,252 @@
 
 using namespace std;
 
-void Matrix::defRate(double newRate){
-	rate = newRate;
+void Matrix::setRate(double value) {
+    mRate = value;
 }
 
-Matrix::Matrix(unsigned int nInput,unsigned int nHLayers,unsigned int nNperHLayers,unsigned int nOutput):Input(new ILayer(nInput)),Output(new HLayer(nOutput)){
-  for(unsigned int x(0); x < nHLayers; ++x)
-    layer.push_back(new HLayer(nNperHLayers));
-  layer.insert(layer.begin(),Input);
-  layer.insert(layer.end(),Output);
+Matrix::Matrix(unsigned int nInput, unsigned int nHLayers, unsigned int nNperHLayers, unsigned int nOutput) :mInput(new ILayer(nInput)), mOutput(new HLayer(nOutput)) {
+    for(unsigned int x(0); x < nHLayers; ++x)
+        mLayer.push_back(new HLayer(nNperHLayers));
+    mLayer.insert(mLayer.begin(), mInput);
+    mLayer.insert(mLayer.end(), mOutput);
 
-  genP();
+    genP();
 }
 
-Matrix::Matrix(MatrixData *dt):Input(new ILayer(dt->Layer.front())),Output(new HLayer(dt->Layer.back())){
-  for(unsigned int x(0); x < dt->Layer.size()-2; ++x)
-    layer.push_back(new HLayer(dt->Layer.at(x+1)));
-  layer.insert(layer.begin(),Input);
-  layer.insert(layer.end(),Output);
+Matrix::Matrix(MatrixData *M) :mInput(new ILayer(M->Layer[0])), mOutput(new HLayer(M->Layer[3])) {
+    for(unsigned int x(0); x < M->Layer[1]; ++x)
+        mLayer.push_back(new HLayer(M->Layer[2]));
+    mLayer.insert(mLayer.begin(), mInput);
+    mLayer.insert(mLayer.end(), mOutput);
 
-  bias = dt->Bias;
-  weight = dt->Weight;
-  data = dt->Data;
+    genP();
 
-  for(unsigned int x(0);x < weight.size();++x){
-    vector<double*> a;
-    dWeight.push_back(a);
-    for(unsigned int y(0);y < weight.at(x).size();++y){
-      dWeight.back().push_back(new double(0));
+    mBias = M->Bias;
+    mWeight = M->Weight;
+    mData = M->Data;
+
+    for(unsigned int x(0); x < mWeight.size(); ++x) {
+        vector<double*> a;
+        mDWeight.push_back(a);
+        for(unsigned int y(0); y < mWeight.at(x).size(); ++y) {
+            mDWeight.back().push_back(new double(0));
+        }
     }
-  }
-  for(unsigned int x(0);x < bias.size();++x){
-    vector<double*> a;
-    dBias.push_back(a);
-    for(unsigned int y(0);y < bias.at(x).size();++y){
-      dBias.back().push_back(new double(0));
+    for(unsigned int x(0); x < mBias.size(); ++x) {
+        vector<double*> a;
+        mDBias.push_back(a);
+        for(unsigned int y(0); y < mBias.at(x).size(); ++y) {
+            mDBias.back().push_back(new double(0));
+        }
     }
-  }
-  for(unsigned int x(0);x < data.size();++x){
-    vector<double> a;
-    data.at(x).push_back(a);
-    for(unsigned int y(0);y < Output->getLenght();++y)
-      data.at(x).back().push_back(0);
-  }
+    for(unsigned int x(0); x < mData.size(); ++x) {
+        vector<double> a;
+        mData.at(x).push_back(a);
+        for(unsigned int y(0); y < mOutput->getLenght(); ++y)
+            mData.at(x).back().push_back(0);
+    }
 }
 
-Matrix::~Matrix(){
-  for(unsigned int x(0);x < layer.size();++x)
-    delete layer.at(x);
-  for(unsigned int x(0);x < weight.size();++x){
-    for(unsigned int y(0);y < weight.at(x).size();++y){
-      delete weight.at(x).at(y);
-      delete dWeight.at(x).at(y);
+Matrix::~Matrix() {
+    for(unsigned int x(0); x < mLayer.size(); ++x)
+        delete mLayer.at(x);
+    for(unsigned int x(0); x < mWeight.size(); ++x) {
+        for(unsigned int y(0); y < mWeight.at(x).size(); ++y) {
+            delete mWeight.at(x).at(y);
+            delete mDWeight.at(x).at(y);
+        }
     }
-  }
-  for(unsigned int x(0);x < bias.size();++x){
-    for(unsigned int y(0);y < bias.at(x).size();++y){
-      delete bias.at(x).at(y);
-      delete dBias.at(x).at(y);
+    for(unsigned int x(0); x < mBias.size(); ++x) {
+        for(unsigned int y(0); y < mBias.at(x).size(); ++y) {
+            delete mBias.at(x).at(y);
+            delete mDBias.at(x).at(y);
+        }
     }
-  }
-  weight.clear();
-  dWeight.clear();
-  bias.clear();
-  dBias.clear();
-  data.clear();
-  layer.clear();
+    mWeight.clear();
+    mDWeight.clear();
+    mBias.clear();
+    mDBias.clear();
+    mData.clear();
+    mLayer.clear();
 }
 
-MatrixData* Matrix::getAllData(){
-  MatrixData *dat = new MatrixData;
-  for(unsigned int x(0);x < layer.size();++x)
-    dat->Layer.push_back(layer.at(x)->getLenght());
-  dat->Weight = weight;
-  dat->Bias = bias;
-  dat->Data = data;
-  return dat;
+MatrixData* Matrix::getAllData() {
+    MatrixData *dat = new MatrixData;
+    {
+        dat->Layer[0] = mLayer.front()->getLenght();
+        dat->Layer[1] = mLayer.size() - 2;
+        dat->Layer[2] = mLayer.at(1)->getLenght();
+        dat->Layer[3] = mLayer.back()->getLenght();
+    }
+    dat->rate = mRate;
+    dat->Weight = mWeight;
+    dat->Bias = mBias;
+    dat->Data = mData;
+    return dat;
 }
 
-vector<double> Matrix::genRand(unsigned int i){
-  random_device rd;
-  mt19937 gen(rd());
-  uniform_real_distribution<> dis(-1,1);
-  vector<double> vec;
-  for(unsigned int x(0);x < i;++x)
-    vec.push_back(dis(gen));
-  return vec;
+vector<double> Matrix::genRand(unsigned int i) {
+    random_device rd;
+    mt19937 gen(rd());
+    uniform_real_distribution<> dis(-1, 1);
+    vector<double> vec;
+    for(unsigned int x(0); x < i; ++x)
+        vec.push_back(dis(gen));
+    return vec;
 }
 
 void Matrix::genP() {
-  unsigned int i(0);
+    unsigned int i(0);
 
-  // how may weights
-  for(unsigned int x(0);x < layer.size()-1;++x){
-    for(unsigned int y(0);y < layer.at(x)->getLenght();++y){
-      for(unsigned int z(0);z < layer.at(x+1)->getLenght();++z){
-        i++;
-      }
+    // how may weights
+    for(unsigned int x(0); x < mLayer.size() - 1; ++x) {
+        for(unsigned int y(0); y < mLayer.at(x)->getLenght(); ++y) {
+            for(unsigned int z(0); z < mLayer.at(x + 1)->getLenght(); ++z) {
+                i++;
+            }
+        }
     }
-  }
 
-  // how many bias
-  for(unsigned int x(1);x < layer.size();++x){
-    for(unsigned int y(0);y < layer.at(x)->getLenght();++y){
-      i++;
+    // how many bias
+    for(unsigned int x(1); x < mLayer.size(); ++x) {
+        for(unsigned int y(0); y < mLayer.at(x)->getLenght(); ++y) {
+            i++;
+        }
     }
-  }
 
-  vector<double> vec = genRand(i);
+    vector<double> vec = genRand(i);
 
-  for(unsigned int x(0);x < layer.size()-1;++x){
-    for(unsigned int y(0);y < layer.at(x)->getLenght();++y){
-      vector<double*> a;
-      vector<double*> b;
-      weight.push_back(a);
-      dWeight.push_back(b);
-      for(unsigned int z(0);z < layer.at(x+1)->getLenght();++z){
-        weight.back().push_back(new double(vec.at(0)));
-        vec.erase(vec.begin());
-        dWeight.back().push_back(new double(0));
-      }
+    for(unsigned int x(0); x < mLayer.size() - 1; ++x) {
+        for(unsigned int y(0); y < mLayer.at(x)->getLenght(); ++y) {
+            vector<double*> a;
+            vector<double*> b;
+            mWeight.push_back(a);
+            mDWeight.push_back(b);
+            for(unsigned int z(0); z < mLayer.at(x + 1)->getLenght(); ++z) {
+                mWeight.back().push_back(new double(vec.at(0)));
+                vec.erase(vec.begin());
+                mDWeight.back().push_back(new double(0));
+            }
+        }
     }
-  }
 
-  for(unsigned int x(1); x < layer.size(); ++x) {
-    vector<double*> a;
-    vector<double*> b;
-    bias.push_back(a);
-    dBias.push_back(b);
-    for(unsigned int y(0); y < layer.at(x)->getLenght(); ++y){
-      bias.back().push_back(new double(vec.at(0)));
-      vec.erase(vec.begin());
-      dBias.back().push_back(new double(0));
+    for(unsigned int x(1); x < mLayer.size(); ++x) {
+        vector<double*> a;
+        vector<double*> b;
+        mBias.push_back(a);
+        mDBias.push_back(b);
+        for(unsigned int y(0); y < mLayer.at(x)->getLenght(); ++y) {
+            mBias.back().push_back(new double(vec.at(0)));
+            vec.erase(vec.begin());
+            mDBias.back().push_back(new double(0));
+        }
     }
-  }
 }
 
-vector<double> Matrix::calculate(vector<double> dataVec){
-  feedforward(dataVec);
-  return Output->getOutput();
+vector<double> Matrix::calculate(vector<double> dataVec) {
+    feedforward(dataVec);
+    return mOutput->getOutput();
 }
 
-vector<double> Matrix::getError(unsigned int atData){
-  vector<double> vec;
-  for(unsigned int x(0);x < Output->getLenght();++x)
-    vec.push_back(data.at(atData).at(1).at(x) - data.at(atData).back().at(x));
-  return vec;
+vector<double> Matrix::getError(unsigned int atData) {
+    vector<double> vec;
+    for(unsigned int x(0); x < mOutput->getLenght(); ++x)
+        vec.push_back(mData.at(atData).at(1).at(x) - mData.at(atData).back().at(x));
+    return vec;
 }
 
-#ifdef __linux
-  void Matrix::learn(unsigned int iterations) {
-    leftIterations = &iterations;
-    for(unsigned int *x(&iterations);*x;--*x) {
-      for(unsigned int y(0);y < data.size(); ++y) {
-        feedforward(data.at(y).at(0));
-        sigma(y);
-        backpropagation();
-        data.at(y).back() = Output->getOutput();
-      }
+void Matrix::learn(unsigned int iterations) {
+    for(unsigned int x(0); x < iterations; ++x) {
+        for(unsigned int y(0); y < mData.size(); ++y) {
+            feedforward(mData.at(y).at(0));
+            sigma(y);
+            backpropagation();
+            // TESTAR
+            mData.at(y).back() = mOutput->getOutput();
+        }
     }
-  }
-
-  void Matrix::stop(){
-    *leftIterations = 5;
-  }
-
-#else
-  void Matrix::learn(unsigned int iterations){
-    for(unsigned int x(0);x < iterations;++x) {
-      for(unsigned int y(0);y < data.size(); ++y) {
-        feedforward(data.at(y).at(0));
-        sigma(y);
-        backpropagation();
-        data.at(y).back() = Output->getOutput();
-      }
-    }
-  }
-#endif // __linux
+}
 
 void Matrix::addData(vector< vector<double> > newData) {
-  data.push_back(newData);
-  vector<double> a;
-  data.back().push_back(a);
-  for(unsigned int x(0);x < Output->getLenght();++x)
-    data.back().back().push_back(0);
+    mData.push_back(newData);
+    vector<double> a;
+    mData.back().push_back(a);
+    for(unsigned int x(0); x < mOutput->getLenght(); ++x)
+        mData.back().back().push_back(0);
 }
 
 void Matrix::resetHL() {
-  for(unsigned int x(0); x < layer.size(); ++x) {
-    for(unsigned int y(0); y < layer.at(x)->getLenght(); ++y)
-      layer.at(x)->setValue(y,0);
-  }
+    for(unsigned int x(0); x < mLayer.size(); ++x) {
+        for(unsigned int y(0); y < mLayer.at(x)->getLenght(); ++y)
+            mLayer.at(x)->setValue(y, 0);
+    }
 }
 
 void Matrix::feedforward(vector<double> dat) {
-  resetHL();
-  for(unsigned int x(0); x < Input->getLenght(); ++x)
-    Input->setValue(x,dat.at(x));
-  int i(0),j(0);
-  for(unsigned int x(1); x < layer.size(); ++x) {
-    for(unsigned int y(0); y < layer.at(x)->getLenght(); ++y) {
-      for(unsigned int z(0); z < layer.at(x-1)->getLenght(); ++z)
-        layer.at(x)->setValue(y,layer.at(x)->getValue(y) + (layer.at(x-1)->getSigmo(z) * *weight.at(z+j).at(y)));
-      layer.at(x)->setValue(y,layer.at(x)->getValue(y) - *bias.at(x-1).at(y));
-      ++i;
+    resetHL();
+    for(unsigned int x(0); x < mInput->getLenght(); ++x)
+        mInput->setValue(x, dat.at(x));
+    int i(0), j(0);
+    for(unsigned int x(1); x < mLayer.size(); ++x) {
+        for(unsigned int y(0); y < mLayer.at(x)->getLenght(); ++y) {
+            for(unsigned int z(0); z < mLayer.at(x - 1)->getLenght(); ++z)
+                mLayer.at(x)->setValue(y, mLayer.at(x)->getValue(y) + (mLayer.at(x - 1)->getSigmo(z) * *mWeight.at(z + j).at(y)));
+            mLayer.at(x)->setValue(y, mLayer.at(x)->getValue(y) - *mBias.at(x - 1).at(y));
+            ++i;
+        }
+        j = i;
     }
-    j = i;
-  }
 }
 
 void Matrix::sigma(unsigned int dataPosition) {
-  for(unsigned int y(0); y < Output->getLenght(); ++y){
-    Output->setSigma(y,(Output->getSigmo(y)) * (1-Output->getSigmo(y)) * (data.at(dataPosition).at(1).at(y) - Output->getSigmo(y)));
-    data.at(dataPosition).back().at(y) = Output->getSigmo(y);
-  }
-  for(unsigned int x(layer.size()-2);x > 0;--x){
-    int i(0);
-    for(unsigned int y(0); y < x; ++y)
-      i += layer.at(y)->getLenght();
-    for(unsigned int y(0); y < layer.at(x)->getLenght(); ++y) {
-      double j(0);
-      for(unsigned short z(0);z < layer.at(x+1)->getLenght() ;++z)
-        j += layer.at(x+1)->getSigma(z) * *weight.at(i+y).at(z);
-      layer.at(x)->setSigma(y,layer.at(x)->getSigmo(y) * (1 - layer.at(x)->getSigmo(y)) * j);
+    for(unsigned int y(0); y < mOutput->getLenght(); ++y) {
+        mOutput->setSigma(y, (mOutput->getSigmo(y)) * (1 - mOutput->getSigmo(y)) * (mData.at(dataPosition).at(1).at(y) - mOutput->getSigmo(y)));
+        mData.at(dataPosition).back().at(y) = mOutput->getSigmo(y);
     }
-  }
+    for(unsigned int x(mLayer.size() - 2); x > 0; --x) {
+        int i(0);
+        for(unsigned int y(0); y < x; ++y)
+            i += mLayer.at(y)->getLenght();
+        for(unsigned int y(0); y < mLayer.at(x)->getLenght(); ++y) {
+            double j(0);
+            for(unsigned short z(0); z < mLayer.at(x + 1)->getLenght(); ++z)
+                j += mLayer.at(x + 1)->getSigma(z) * *mWeight.at(i + y).at(z);
+            mLayer.at(x)->setSigma(y, mLayer.at(x)->getSigmo(y) * (1 - mLayer.at(x)->getSigmo(y)) * j);
+        }
+    }
 }
 
-void Matrix::resetP(){
-  for(unsigned int x(0);x < weight.size();++x)
-    weight.at(x).clear();
-  weight.clear();
-  for(unsigned int x(0);x < bias.size();++x)
-    bias.at(x).clear();
-  bias.clear();
+void Matrix::resetP() {
+    for(unsigned int x(0); x < mWeight.size(); ++x)
+        mWeight.at(x).clear();
+    mWeight.clear();
+    for(unsigned int x(0); x < mBias.size(); ++x)
+        mBias.at(x).clear();
+    mBias.clear();
 }
 
 void Matrix::backpropagation() {
-  for(unsigned int atLayer(layer.size()-1); atLayer > 0; --atLayer) {
-    for(unsigned int atNeuron(0); atNeuron < layer.at(atLayer)->getLenght(); ++atNeuron)
-      for(unsigned int x(0); x < layer.at(atLayer-1)->getLenght(); ++x) {
-        int i(0);
-        for(unsigned int y(0); y < atLayer-1; ++y)
-          i += layer.at(y)->getLenght();
-        *dWeight.at(x+i).at(atNeuron) = (rate * layer.at(atLayer-1)->getSigmo(x) * layer.at(atLayer)->getSigma(atNeuron));
-      }
-  }
-  for(unsigned int x(0); x < bias.size(); ++x) {
-    for(unsigned int y(0); y < bias.at(x).size(); ++y)
-      *dBias.at(x).at(y) = (rate * -1 * layer.at(x+1)->getSigma(y));
-  }
+    for(unsigned int atLayer(mLayer.size() - 1); atLayer > 0; --atLayer) {
+        for(unsigned int atNeuron(0); atNeuron < mLayer.at(atLayer)->getLenght(); ++atNeuron)
+            for(unsigned int x(0); x < mLayer.at(atLayer - 1)->getLenght(); ++x) {
+                int i(0);
+                for(unsigned int y(0); y < atLayer - 1; ++y)
+                    i += mLayer.at(y)->getLenght();
+                *mDWeight.at(x + i).at(atNeuron) = (mRate * mLayer.at(atLayer - 1)->getSigmo(x) * mLayer.at(atLayer)->getSigma(atNeuron));
+            }
+    }
+    for(unsigned int x(0); x < mBias.size(); ++x) {
+        for(unsigned int y(0); y < mBias.at(x).size(); ++y)
+            *mDBias.at(x).at(y) = (mRate * -1 * mLayer.at(x + 1)->getSigma(y));
+    }
 
-  for(unsigned int x(0); x < weight.size(); ++x) {
-    for(unsigned int y(0); y < weight.at(x).size(); ++y)
-      *weight.at(x).at(y) += *dWeight.at(x).at(y);
-  }
-  for(unsigned int x(0); x < bias.size(); ++x) {
-    for(unsigned int y(0); y < bias.at(x).size(); ++y)
-      *bias.at(x).at(y) += *dBias.at(x).at(y);
-  }
+    for(unsigned int x(0); x < mWeight.size(); ++x) {
+        for(unsigned int y(0); y < mWeight.at(x).size(); ++y)
+            *mWeight.at(x).at(y) += *mDWeight.at(x).at(y);
+    }
+    for(unsigned int x(0); x < mBias.size(); ++x) {
+        for(unsigned int y(0); y < mBias.at(x).size(); ++y)
+            *mBias.at(x).at(y) += *mDBias.at(x).at(y);
+    }
 }

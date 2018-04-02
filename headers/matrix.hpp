@@ -1,5 +1,4 @@
-#ifndef MATRIX_H
-#define MATRIX_H
+#pragma once
 
 #include "layer.hpp"
 #include <iostream>
@@ -7,16 +6,16 @@
 
 using namespace std;
 
-struct MatrixData{
-    vector<unsigned int> Layer;
+struct MatrixData {
+    unsigned int Layer[4];
+    double rate;
     vector< vector<double*> > Weight;
     vector< vector<double*> > Bias;
     vector< vector< vector<double> > > Data;
-    string presetName;
 };
 
 class Matrix {
-  public:
+    public:
     Matrix(unsigned int nInput, unsigned int nHLayers, unsigned int nNperHLayers, unsigned int nOutput);
     Matrix(MatrixData *dt);
     ~Matrix();
@@ -28,10 +27,9 @@ class Matrix {
 
     void sigma(unsigned int dataPosition);
     void addData(vector< vector<double> > newData);
-    void defRate(double newRate);
+    void setRate(double newRate);
 
     void learn(unsigned int iterations);
-    void stop();
 
     void genP();
     void resetHL();
@@ -40,17 +38,15 @@ class Matrix {
     void feedforward(vector<double> dat);
     void backpropagation();
 
-  private:
-    vector< vector<double*> > weight;
-    vector< vector<double*> > dWeight;
-    vector< vector<double*> > bias;
-    vector< vector<double*> > dBias;
-    vector< vector< vector<double> > > data;
-    vector<Layer*> layer;
-    unsigned int *leftIterations;
-    ILayer *Input;
-    HLayer *Output;
-    double rate;
+    private:
+    vector< vector<double*> > mWeight;
+    vector< vector<double*> > mDWeight;
+    vector< vector<double*> > mBias;
+    vector< vector<double*> > mDBias;
+    vector< vector< vector<double> > > mData;
+    vector<Layer*> mLayer;
+    unsigned int *mLeftIterations;
+    ILayer *mInput;
+    HLayer *mOutput;
+    double mRate;
 };
-
-#endif // MATRIX_H
