@@ -5,8 +5,6 @@
 #include <cstdio>
 #include <chrono>
 
-using std::cout;
-
 Tools::~Tools() {
     if(m != NULL)
         delete m;

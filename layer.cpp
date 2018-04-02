@@ -1,19 +1,9 @@
 #include "headers/layer.hpp"
 #include <vector>
 
-using namespace std;
-
 Layer::Layer(unsigned int nNeurons) {
     for(unsigned int x(0); x < nNeurons; ++x)
         neuron.push_back(new Neuron);
-}
-
-void Layer::setSigma(unsigned int at, double value) {
-    neuron.at(at)->setSigma(value);
-}
-
-void Layer::setValue(unsigned int at, double value) {
-    neuron.at(at)->setValue(value);
 }
 
 double Layer::getValue(unsigned int at) {
@@ -26,6 +16,14 @@ double Layer::getSigma(unsigned int at) {
 
 unsigned int Layer::getLenght() {
     return neuron.size();
+}
+
+void Layer::setSigma(unsigned int at, double value) {
+    neuron.at(at)->setSigma(value);
+}
+
+void Layer::setValue(unsigned int at, double value) {
+    neuron.at(at)->setValue(value);
 }
 
 vector<double> Layer::getOutput() {

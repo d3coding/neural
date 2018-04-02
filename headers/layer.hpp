@@ -17,12 +17,13 @@ class Layer {
 
     virtual double getSigmo(unsigned int at) = 0;
 
-    vector<double> getOutput();
     double getValue(unsigned int at);
     double getSigma(unsigned int at);
     unsigned int getLenght();
     void setSigma(unsigned int at, double value);
     void setValue(unsigned int at, double value);
+
+    vector<double> getOutput();
     protected:
     vector<Neuron*> neuron;
 };
