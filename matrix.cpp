@@ -108,7 +108,7 @@ vector<double> Matrix::genRand(unsigned int i) {
     return vec;
 }
 
-void Matrix::learn(unsigned int iterations) {
+void Matrix::learnFor(unsigned int iterations) {
     for(unsigned int x(0); x < iterations; ++x) {
         for(unsigned int y(0); y < mData.size(); ++y) {
             feedforward(mData.at(y).at(0));

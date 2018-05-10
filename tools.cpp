@@ -55,7 +55,7 @@ void Tools::learn(unsigned int iterations) {
     } else {
         auto start = chrono::system_clock::now();
         cout << "# Treinando...\n";
-        m->learn(iterations);
+        m->learnFor(iterations);
         auto end = chrono::system_clock::now();
         cout << "# Sucesso ao treinar!...\n" << "# Tempo decorrido: " << (chrono::duration_cast<chrono::milliseconds>(end - start)).count() << "ms\n";
     }

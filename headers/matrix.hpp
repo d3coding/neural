@@ -29,7 +29,7 @@ class Matrix {
     void addData(vector< vector<double> > newData);
     void setRate(double newRate);
 
-    void learn(unsigned int iterations);
+    void learnFor(unsigned int iterations);
 
     void genP();
     void resetHL();
