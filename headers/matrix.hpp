@@ -9,8 +9,8 @@ using namespace std;
 struct MatrixData {
     unsigned int Layer[4];
     double rate;
-    vector< vector<double*> > Weight;
-    vector< vector<double*> > Bias;
+    vector< vector<double> > Weight;
+    vector< vector<double> > Bias;
     vector< vector< vector<double> > > Data;
 };
 
@@ -39,10 +39,10 @@ class Matrix {
     void backpropagation();
 
     private:
-    vector< vector<double*> > mWeight;
-    vector< vector<double*> > mDWeight;
-    vector< vector<double*> > mBias;
-    vector< vector<double*> > mDBias;
+    vector< vector<double> > mWeight;
+    vector< vector<double> > mDWeight;
+    vector< vector<double> > mBias;
+    vector< vector<double> > mDBias;
     vector< vector< vector<double> > > mData;
     vector<Layer*> mLayer;
     unsigned int *mLeftIterations;

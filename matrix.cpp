@@ -27,17 +27,17 @@ Matrix::Matrix(MatrixData *M) :mInput(new ILayer(M->Layer[0])), mOutput(new HLay
     mData = M->Data;
 
     for(unsigned int x(0); x < mWeight.size(); ++x) {
-        vector<double*> a;
+        vector<double> a;
         mDWeight.push_back(a);
         for(unsigned int y(0); y < mWeight.at(x).size(); ++y) {
-            mDWeight.back().push_back(new double(0));
+            mDWeight.back().push_back(0);
         }
     }
     for(unsigned int x(0); x < mBias.size(); ++x) {
-        vector<double*> a;
+        vector<double> a;
         mDBias.push_back(a);
         for(unsigned int y(0); y < mBias.at(x).size(); ++y) {
-            mDBias.back().push_back(new double(0));
+            mDBias.back().push_back(0);
         }
     }
     for(unsigned int x(0); x < mData.size(); ++x) {
@@ -51,18 +51,6 @@ Matrix::Matrix(MatrixData *M) :mInput(new ILayer(M->Layer[0])), mOutput(new HLay
 Matrix::~Matrix() {
     for(unsigned int x(0); x < mLayer.size(); ++x)
         delete mLayer.at(x);
-    for(unsigned int x(0); x < mWeight.size(); ++x) {
-        for(unsigned int y(0); y < mWeight.at(x).size(); ++y) {
-            delete mWeight.at(x).at(y);
-            delete mDWeight.at(x).at(y);
-        }
-    }
-    for(unsigned int x(0); x < mBias.size(); ++x) {
-        for(unsigned int y(0); y < mBias.at(x).size(); ++y) {
-            delete mBias.at(x).at(y);
-            delete mDBias.at(x).at(y);
-        }
-    }
     mWeight.clear();
     mDWeight.clear();
     mBias.clear();
@@ -132,7 +120,7 @@ void Matrix::sigma(unsigned int dataPosition) {
         for(unsigned int y(0); y < mLayer.at(x)->getLenght(); ++y) {
             double j(0);
             for(unsigned short z(0); z < mLayer.at(x + 1)->getLenght(); ++z)
-                j += mLayer.at(x + 1)->getSigma(z) * *mWeight.at(i + y).at(z);
+                j += mLayer.at(x + 1)->getSigma(z) * mWeight.at(i + y).at(z);
             mLayer.at(x)->setSigma(y, mLayer.at(x)->getSigmo(y) * (1 - mLayer.at(x)->getSigmo(y)) * j);
         }
     }
@@ -173,27 +161,27 @@ void Matrix::genP() {
 
     for(unsigned int x(0); x < mLayer.size() - 1; ++x) {
         for(unsigned int y(0); y < mLayer.at(x)->getLenght(); ++y) {
-            vector<double*> a;
-            vector<double*> b;
+            vector<double> a;
+            vector<double> b;
             mWeight.push_back(a);
             mDWeight.push_back(b);
             for(unsigned int z(0); z < mLayer.at(x + 1)->getLenght(); ++z) {
-                mWeight.back().push_back(new double(vec.at(0)));
+                mWeight.back().push_back(vec.at(0));
                 vec.erase(vec.begin());
-                mDWeight.back().push_back(new double(0));
+                mDWeight.back().push_back(0);
             }
         }
     }
 
     for(unsigned int x(1); x < mLayer.size(); ++x) {
-        vector<double*> a;
-        vector<double*> b;
+        vector<double> a;
+        vector<double> b;
         mBias.push_back(a);
         mDBias.push_back(b);
         for(unsigned int y(0); y < mLayer.at(x)->getLenght(); ++y) {
-            mBias.back().push_back(new double(vec.at(0)));
+            mBias.back().push_back(vec.at(0));
             vec.erase(vec.begin());
-            mDBias.back().push_back(new double(0));
+            mDBias.back().push_back(0);
         }
     }
 }
@@ -222,8 +210,8 @@ void Matrix::feedforward(vector<double> dat) {
     for(unsigned int x(1); x < mLayer.size(); ++x) {
         for(unsigned int y(0); y < mLayer.at(x)->getLenght(); ++y) {
             for(unsigned int z(0); z < mLayer.at(x - 1)->getLenght(); ++z)
-                mLayer.at(x)->setValue(y, mLayer.at(x)->getValue(y) + (mLayer.at(x - 1)->getSigmo(z) * *mWeight.at(z + j).at(y)));
-            mLayer.at(x)->setValue(y, mLayer.at(x)->getValue(y) - *mBias.at(x - 1).at(y));
+                mLayer.at(x)->setValue(y, mLayer.at(x)->getValue(y) + (mLayer.at(x - 1)->getSigmo(z) * mWeight.at(z + j).at(y)));
+            mLayer.at(x)->setValue(y, mLayer.at(x)->getValue(y) - mBias.at(x - 1).at(y));
             ++i;
         }
         j = i;
@@ -237,20 +225,20 @@ void Matrix::backpropagation() {
                 int i(0);
                 for(unsigned int y(0); y < atLayer - 1; ++y)
                     i += mLayer.at(y)->getLenght();
-                *mDWeight.at(x + i).at(atNeuron) = (mRate * mLayer.at(atLayer - 1)->getSigmo(x) * mLayer.at(atLayer)->getSigma(atNeuron));
+                mDWeight.at(x + i).at(atNeuron) = (mRate * mLayer.at(atLayer - 1)->getSigmo(x) * mLayer.at(atLayer)->getSigma(atNeuron));
             }
     }
     for(unsigned int x(0); x < mBias.size(); ++x) {
         for(unsigned int y(0); y < mBias.at(x).size(); ++y)
-            *mDBias.at(x).at(y) = (mRate * -1 * mLayer.at(x + 1)->getSigma(y));
+            mDBias.at(x).at(y) = (mRate * -1 * mLayer.at(x + 1)->getSigma(y));
     }
 
     for(unsigned int x(0); x < mWeight.size(); ++x) {
         for(unsigned int y(0); y < mWeight.at(x).size(); ++y)
-            *mWeight.at(x).at(y) += *mDWeight.at(x).at(y);
+            mWeight.at(x).at(y) += mDWeight.at(x).at(y);
     }
     for(unsigned int x(0); x < mBias.size(); ++x) {
         for(unsigned int y(0); y < mBias.at(x).size(); ++y)
-            *mBias.at(x).at(y) += *mDBias.at(x).at(y);
+            mBias.at(x).at(y) += mDBias.at(x).at(y);
     }
 }

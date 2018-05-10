@@ -5,28 +5,24 @@
 
 class Neuron {
     public:
-    Neuron() :value(new double(0)), S(new double(0)) {}
-    ~Neuron() {
-        delete value;
-        delete S;
-    }
+    Neuron():value(0), S(0) {}
     void setValue(double x) {
-        *value = x;
+        value = x;
     }
     void setSigma(double x) {
-        *S = x;
+        S = x;
     }
     double getSigmo() {
         return (1 / (1 + exp(-getValue())));
     }
     double getValue() {
-        return *value;
+        return value;
     }
     double getSigma() {
-        return *S;
+        return S;
     }
     private:
-    double *value, *S;
+    double value, S;
 };
 
 #endif // NEURON_H

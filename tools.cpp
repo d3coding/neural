@@ -89,13 +89,13 @@ void Tools::printResult() {
     cout << "########## Weight ###########\n";
     for(unsigned int x(0); x < tmp->Weight.size(); ++x) {
         for(unsigned int y(0); y < tmp->Weight.at(x).size(); ++y)
-            cout << "[" << x << "," << y << "] " << *tmp->Weight.at(x).at(y) << "\t";
+            cout << "[" << x << "," << y << "] " << tmp->Weight.at(x).at(y) << "\t";
         cout << endl;
     }
     cout << "\n########## Bias ##########\n";
     for(unsigned int x(0); x < tmp->Bias.size(); ++x) {
         for(unsigned int y(0); y < tmp->Bias.at(x).size(); ++y)
-            cout << "[" << x << "," << y << "] " << *tmp->Bias.at(x).at(y) << "\t";
+            cout << "[" << x << "," << y << "] " << tmp->Bias.at(x).at(y) << "\t";
         cout << "\n";
     }
     cout << "\n########## Experado ##########\n";
