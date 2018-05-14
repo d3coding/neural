@@ -7,7 +7,8 @@
 using namespace std;
 
 struct MatrixData {
-    unsigned int Layer[4];
+
+    unsigned int nInput, nHLayers, nNperHLayers, nOutput;
     double rate;
     vector< vector<double> > Weight;
     vector< vector<double> > Bias;

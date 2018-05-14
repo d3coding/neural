@@ -15,7 +15,7 @@ double Layer::getSigma(unsigned int at) {
 }
 
 unsigned int Layer::getLenght() {
-    return neuron.size();
+    return (unsigned int) neuron.size();
 }
 
 void Layer::setSigma(unsigned int at, double value) {

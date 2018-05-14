@@ -64,7 +64,7 @@ void Tools::learn(unsigned int iterations) {
 void Tools::logicCalc(bool logic) {
     vector<double> fInput;
     MatrixData *data = m->getAllData();
-    for(unsigned int x(0); x < data->Layer[0]; ++x) {
+    for(unsigned int x(0); x < data->nInput; ++x) {
         cout << "# Digite o valor de entrada para o neuronio(" << x << "):";
         double y;
         cin >> y;
@@ -100,10 +100,10 @@ void Tools::printResult() {
     }
     cout << "\n########## Experado ##########\n";
     for(unsigned int x(0); x < tmp->Data.size(); ++x) {
-        for(unsigned int y(0); y < tmp->Layer[3]; ++y)
+        for(unsigned int y(0); y < tmp->nOutput; ++y)
             cout << "EXPER(" << x << "):\t" << tmp->Data.at(x).at(1).at(y) << "\t";
         cout << "\n";
-        for(unsigned int y(0); y < tmp->Layer[3]; ++y)
+        for(unsigned int y(0); y < tmp->nOutput; ++y)
             cout << "ERRO(" << x << "):\t" << tmp->Data.at(x).at(1).at(y) - tmp->Data.at(x).back().at(y) << "\t";
         cout << "\n";
     }
@@ -111,7 +111,7 @@ void Tools::printResult() {
     double tot(0.0);
     int n(0);
     for(unsigned int x(0); x < tmp->Data.size(); ++x) {
-        for(unsigned int y(0); y < tmp->Layer[3]; ++y) {
+        for(unsigned int y(0); y < tmp->nOutput; ++y) {
             tot += abs(tmp->Data.at(x).at(1).at(y) - tmp->Data.at(x).back().at(y));
             ++n;
         }

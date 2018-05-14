@@ -14,9 +14,9 @@ Matrix::Matrix(unsigned int nInput, unsigned int nHLayers, unsigned int nNperHLa
     genP();
 }
 
-Matrix::Matrix(MatrixData *M) :mInput(new ILayer(M->Layer[0])), mOutput(new HLayer(M->Layer[3])) {
-    for(unsigned int x(0); x < M->Layer[1]; ++x)
-        mLayer.push_back(new HLayer(M->Layer[2]));
+Matrix::Matrix(MatrixData *M) :mInput(new ILayer(M->nInput)), mOutput(new HLayer(M->nOutput)) {
+    for(unsigned int x(0); x < M->nHLayers; ++x)
+        mLayer.push_back(new HLayer(M->nNperHLayers));
     mLayer.insert(mLayer.begin(), mInput);
     mLayer.insert(mLayer.end(), mOutput);
 
@@ -74,10 +74,10 @@ vector<double> Matrix::calculate(vector<double> dataVec) {
 MatrixData* Matrix::getAllData() {
     MatrixData *dat = new MatrixData;
     {
-        dat->Layer[0] = mLayer.front()->getLenght();
-        dat->Layer[1] = mLayer.size() - 2;
-        dat->Layer[2] = mLayer.at(1)->getLenght();
-        dat->Layer[3] = mLayer.back()->getLenght();
+        dat->nInput = mLayer.front()->getLenght();
+        dat->nHLayers = (unsigned int) (mLayer.size()-2);
+        dat->nNperHLayers = mLayer.at(1)->getLenght();
+        dat->nOutput = mLayer.back()->getLenght();
     }
     dat->rate = mRate;
     dat->Weight = mWeight;
@@ -113,7 +113,7 @@ void Matrix::sigma(unsigned int dataPosition) {
         mOutput->setSigma(y, (mOutput->getSigmo(y)) * (1 - mOutput->getSigmo(y)) * (mData.at(dataPosition).at(1).at(y) - mOutput->getSigmo(y)));
         mData.at(dataPosition).back().at(y) = mOutput->getSigmo(y);
     }
-    for(unsigned int x(mLayer.size() - 2); x > 0; --x) {
+    for(unsigned int x((unsigned int)mLayer.size()-2); x > 0; --x) {
         int i(0);
         for(unsigned int y(0); y < x; ++y)
             i += mLayer.at(y)->getLenght();
@@ -219,7 +219,7 @@ void Matrix::feedforward(vector<double> dat) {
 }
 
 void Matrix::backpropagation() {
-    for(unsigned int atLayer(mLayer.size() - 1); atLayer > 0; --atLayer) {
+    for(unsigned int atLayer((unsigned int) mLayer.size()-1); atLayer > 0; --atLayer) {
         for(unsigned int atNeuron(0); atNeuron < mLayer.at(atLayer)->getLenght(); ++atNeuron)
             for(unsigned int x(0); x < mLayer.at(atLayer - 1)->getLenght(); ++x) {
                 int i(0);
