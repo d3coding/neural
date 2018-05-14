@@ -5,7 +5,7 @@
 
 class Neuron {
     public:
-    Neuron():value(0), S(0) {}
+    Neuron() :value(0), S(0) {}
     void setValue(double x) {
         value = x;
     }
@@ -13,7 +13,7 @@ class Neuron {
         S = x;
     }
     double getSigmo() {
-        return (1 / (1 + exp(-getValue())));
+        return (1 / (1 + exp(-value)));
     }
     double getValue() {
         return value;

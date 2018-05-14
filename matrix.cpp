@@ -5,20 +5,20 @@
 #include <cstdlib>
 #include <fstream>
 
-Matrix::Matrix(unsigned int nInput, unsigned int nHLayers, unsigned int nNperHLayers, unsigned int nOutput) :mInput(new ILayer(nInput)), mOutput(new HLayer(nOutput)) {
+Matrix::Matrix(unsigned int nInput, unsigned int nHLayers, unsigned int nNperHLayers, unsigned int nOutput) {
     for(unsigned int x(0); x < nHLayers; ++x)
         mLayer.push_back(new HLayer(nNperHLayers));
-    mLayer.insert(mLayer.begin(), mInput);
-    mLayer.insert(mLayer.end(), mOutput);
+    mLayer.insert(mLayer.begin(), new ILayer(nInput));
+    mLayer.insert(mLayer.end(), new HLayer(nOutput));
 
     genP();
 }
 
-Matrix::Matrix(MatrixData *M) :mInput(new ILayer(M->nInput)), mOutput(new HLayer(M->nOutput)) {
+Matrix::Matrix(MatrixData *M) {
     for(unsigned int x(0); x < M->nHLayers; ++x)
         mLayer.push_back(new HLayer(M->nNperHLayers));
-    mLayer.insert(mLayer.begin(), mInput);
-    mLayer.insert(mLayer.end(), mOutput);
+    mLayer.insert(mLayer.begin(), new ILayer(M->nInput));
+    mLayer.insert(mLayer.end(), new HLayer(M->nOutput));
 
     genP();
 
@@ -43,7 +43,7 @@ Matrix::Matrix(MatrixData *M) :mInput(new ILayer(M->nInput)), mOutput(new HLayer
     for(unsigned int x(0); x < mData.size(); ++x) {
         vector<double> a;
         mData.at(x).push_back(a);
-        for(unsigned int y(0); y < mOutput->getLenght(); ++y)
+        for(unsigned int y(0); y < mLayer.back()->getLenght(); ++y)
             mData.at(x).back().push_back(0);
     }
 }
@@ -61,21 +61,21 @@ Matrix::~Matrix() {
 
 vector<double> Matrix::getError(unsigned int atData) {
     vector<double> vec;
-    for(unsigned int x(0); x < mOutput->getLenght(); ++x)
+    for(unsigned int x(0); x < mLayer.back()->getLenght(); ++x)
         vec.push_back(mData.at(atData).at(1).at(x) - mData.at(atData).back().at(x));
     return vec;
 }
 
 vector<double> Matrix::calculate(vector<double> dataVec) {
     feedforward(dataVec);
-    return mOutput->getOutput();
+    return mLayer.back()->getOutput();
 }
 
 MatrixData* Matrix::getAllData() {
     MatrixData *dat = new MatrixData;
     {
         dat->nInput = mLayer.front()->getLenght();
-        dat->nHLayers = (unsigned int) (mLayer.size()-2);
+        dat->nHLayers = (unsigned int) (mLayer.size() - 2);
         dat->nNperHLayers = mLayer.at(1)->getLenght();
         dat->nOutput = mLayer.back()->getLenght();
     }
@@ -103,17 +103,17 @@ void Matrix::learnFor(unsigned int iterations) {
             sigma(y);
             backpropagation();
             // TESTAR
-            mData.at(y).back() = mOutput->getOutput();
+            mData.at(y).back() = mLayer.back()->getOutput();
         }
     }
 }
 
 void Matrix::sigma(unsigned int dataPosition) {
-    for(unsigned int y(0); y < mOutput->getLenght(); ++y) {
-        mOutput->setSigma(y, (mOutput->getSigmo(y)) * (1 - mOutput->getSigmo(y)) * (mData.at(dataPosition).at(1).at(y) - mOutput->getSigmo(y)));
-        mData.at(dataPosition).back().at(y) = mOutput->getSigmo(y);
+    for(unsigned int y(0); y < mLayer.back()->getLenght(); ++y) {
+        mLayer.back()->setSigma(y, (mLayer.back()->getSigmo(y)) * (1 - mLayer.back()->getSigmo(y)) * (mData.at(dataPosition).at(1).at(y) - mLayer.back()->getSigmo(y)));
+        mData.at(dataPosition).back().at(y) = mLayer.back()->getSigmo(y);
     }
-    for(unsigned int x((unsigned int)mLayer.size()-2); x > 0; --x) {
+    for(unsigned int x((unsigned int) mLayer.size() - 2); x > 0; --x) {
         int i(0);
         for(unsigned int y(0); y < x; ++y)
             i += mLayer.at(y)->getLenght();
@@ -130,7 +130,7 @@ void Matrix::addData(vector< vector<double> > newData) {
     mData.push_back(newData);
     vector<double> a;
     mData.back().push_back(a);
-    for(unsigned int x(0); x < mOutput->getLenght(); ++x)
+    for(unsigned int x(0); x < mLayer.back()->getLenght(); ++x)
         mData.back().back().push_back(0);
 }
 
@@ -204,8 +204,8 @@ void Matrix::resetP() {
 
 void Matrix::feedforward(vector<double> dat) {
     resetHL();
-    for(unsigned int x(0); x < mInput->getLenght(); ++x)
-        mInput->setValue(x, dat.at(x));
+    for(unsigned int x(0); x < mLayer.front()->getLenght(); ++x)
+        mLayer.front()->setValue(x, dat.at(x));
     int i(0), j(0);
     for(unsigned int x(1); x < mLayer.size(); ++x) {
         for(unsigned int y(0); y < mLayer.at(x)->getLenght(); ++y) {
@@ -219,7 +219,7 @@ void Matrix::feedforward(vector<double> dat) {
 }
 
 void Matrix::backpropagation() {
-    for(unsigned int atLayer((unsigned int) mLayer.size()-1); atLayer > 0; --atLayer) {
+    for(unsigned int atLayer((unsigned int) mLayer.size() - 1); atLayer > 0; --atLayer) {
         for(unsigned int atNeuron(0); atNeuron < mLayer.at(atLayer)->getLenght(); ++atNeuron)
             for(unsigned int x(0); x < mLayer.at(atLayer - 1)->getLenght(); ++x) {
                 int i(0);

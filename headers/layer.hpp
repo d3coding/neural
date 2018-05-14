@@ -5,39 +5,33 @@
 
 using namespace std;
 
-class Layer {
+class HLayer {
     public:
-    Layer(unsigned int nNeurons);
+    HLayer(unsigned int nNeurons);
 
-    virtual ~Layer() {
+    virtual ~HLayer() {
         neuron.clear();
     }
 
-    virtual double getSigmo(unsigned int at) = 0;
+    virtual double getSigmo(unsigned int at) {
+        return neuron.at(at).getSigmo();
+    };
 
     double getValue(unsigned int at);
     double getSigma(unsigned int at);
     unsigned int getLenght();
-    void setSigma(unsigned int at, double value);
     void setValue(unsigned int at, double value);
+    void setSigma(unsigned int at, double value);
 
     vector<double> getOutput();
     protected:
     vector<Neuron> neuron;
 };
 
-class ILayer : public Layer {
+class ILayer : public HLayer {
     public:
-    ILayer(unsigned int nNeurons) :Layer(nNeurons) {}
+    ILayer(unsigned int nNeurons) :HLayer(nNeurons) {}
     virtual double getSigmo(unsigned int at) {
         return neuron.at(at).getValue();
-    }
-};
-
-class HLayer : public Layer {
-    public:
-    HLayer(unsigned int nNeurons) :Layer(nNeurons) {}
-    virtual double getSigmo(unsigned int at) {
-        return neuron.at(at).getSigmo();
     }
 };

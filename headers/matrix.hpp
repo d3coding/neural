@@ -45,9 +45,6 @@ class Matrix {
     vector< vector<double> > mBias;
     vector< vector<double> > mDBias;
     vector< vector< vector<double> > > mData;
-    vector<Layer*> mLayer;
-    unsigned int *mLeftIterations;
-    ILayer *mInput;
-    HLayer *mOutput;
+    vector<HLayer*> mLayer;
     double mRate;
 };
