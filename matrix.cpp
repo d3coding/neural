@@ -8,7 +8,7 @@
 Matrix::Matrix(size_t nInput, size_t nHLayers, size_t nNperHLayers, size_t nOutput, bool gen) {
     for(size_t x = 0; x < nHLayers; ++x)
         mLayer.push_back(new HLayer(nNperHLayers));
-    mLayer.insert(mLayer.begin(), new ILayer(nInput));
+    mLayer.insert(mLayer.begin(),new ILayer(nInput));
     mLayer.insert(mLayer.end(), new HLayer(nOutput));
 
     if(gen) genP(getWn() + getBn());
@@ -86,9 +86,9 @@ Matrix::~Matrix() {
     mLayer.clear();
 }
 
-vector<double> Matrix::getError(unsigned int atData) {
+vector<double> Matrix::getError(size_t atData) {
     vector<double> vec;
-    for(unsigned int x(0); x < mLayer.back()->getLenght(); ++x)
+    for(size_t x = 0; x < mLayer.back()->getLenght(); ++x)
         vec.push_back(mData.at(atData).at(1).at(x) - mData.at(atData).back().at(x));
     return vec;
 }
@@ -124,27 +124,25 @@ vector<double> Matrix::genRand(unsigned int i) {
 }
 
 void Matrix::learnFor(unsigned int iterations) {
-    for(unsigned int x(0); x < iterations; ++x) {
-        for(unsigned int y(0); y < mData.size(); ++y) {
+    for(unsigned int x = 0; x < iterations; ++x) {
+        for(unsigned int y = 0; y < mData.size(); ++y) {
             feedforward(mData.at(y).at(0));
             sigma(y);
             backpropagation();
-            // TESTAR
-            mData.at(y).back() = mLayer.back()->getOutput();
         }
     }
 }
 
-void Matrix::sigma(unsigned int dataPosition) {
-    for(unsigned int y(0); y < mLayer.back()->getLenght(); ++y) {
+void Matrix::sigma(size_t dataPosition) {
+    for(size_t y = 0; y < mLayer.back()->getLenght(); ++y) {
         mLayer.back()->setSigma(y, (mLayer.back()->getSigmo(y)) * (1 - mLayer.back()->getSigmo(y)) * (mData.at(dataPosition).at(1).at(y) - mLayer.back()->getSigmo(y)));
         mData.at(dataPosition).back().at(y) = mLayer.back()->getSigmo(y);
     }
-    for(unsigned int x((unsigned int) mLayer.size() - 2); x > 0; --x) {
-        int i(0);
+    for(size_t x(mLayer.size() - 2); x > 0; --x) {
+        size_t i = 0;
         for(unsigned int y(0); y < x; ++y)
             i += mLayer.at(y)->getLenght();
-        for(unsigned int y(0); y < mLayer.at(x)->getLenght(); ++y) {
+        for(size_t y = 0; y < mLayer.at(x)->getLenght(); ++y) {
             double j(0);
             for(unsigned short z(0); z < mLayer.at(x + 1)->getLenght(); ++z)
                 j += mLayer.at(x + 1)->getSigma(z) * mWeight.at(i + y).at(z);
@@ -157,7 +155,7 @@ void Matrix::addData(vector< vector<double> > newData) {
     mData.push_back(newData);
     vector<double> a;
     mData.back().push_back(a);
-    for(unsigned int x(0); x < mLayer.back()->getLenght(); ++x)
+    for(size_t x = 0; x < mLayer.back()->getLenght(); ++x)
         mData.back().back().push_back(0);
 }
 
@@ -167,9 +165,9 @@ void Matrix::setRate(double value) {
 
 unsigned int Matrix::getWn() {
     unsigned int i = 0;
-    for(unsigned int x(0); x < mLayer.size() - 1; ++x) {
-        for(unsigned int y(0); y < mLayer.at(x)->getLenght(); ++y) {
-            for(unsigned int z(0); z < mLayer.at(x + 1)->getLenght(); ++z) {
+    for(size_t x = 0; x < mLayer.size() - 1; ++x) {
+        for(size_t y = 0; y < mLayer.at(x)->getLenght(); ++y) {
+            for(size_t z = 0; z < mLayer.at(x + 1)->getLenght(); ++z) {
                 i++;
             }
         }
@@ -179,8 +177,8 @@ unsigned int Matrix::getWn() {
 
 unsigned int Matrix::getBn() {
     unsigned int i = 0;
-    for(unsigned int x(1); x < mLayer.size(); ++x) {
-        for(unsigned int y(0); y < mLayer.at(x)->getLenght(); ++y) {
+    for(size_t x = 1; x < mLayer.size(); ++x) {
+        for(size_t y = 0; y < mLayer.at(x)->getLenght(); ++y) {
             i++;
         }
     }
@@ -218,29 +216,29 @@ void Matrix::genP(unsigned int totalParam) {
 }
 
 void Matrix::resetHL() {
-    for(unsigned int x(0); x < mLayer.size(); ++x) {
-        for(unsigned int y(0); y < mLayer.at(x)->getLenght(); ++y)
+    for(size_t x = 0; x < mLayer.size(); ++x) {
+        for(size_t y = 0; y < mLayer.at(x)->getLenght(); ++y)
             mLayer.at(x)->setValue(y, 0);
     }
 }
 
 void Matrix::resetP() {
-    for(unsigned int x(0); x < mWeight.size(); ++x)
+    for(size_t x = 0; x < mWeight.size(); ++x)
         mWeight.at(x).clear();
     mWeight.clear();
-    for(unsigned int x(0); x < mBias.size(); ++x)
+    for(size_t x = 0; x < mBias.size(); ++x)
         mBias.at(x).clear();
     mBias.clear();
 }
 
 void Matrix::feedforward(vector<double> dat) {
     resetHL();
-    for(unsigned int x(0); x < mLayer.front()->getLenght(); ++x)
+    for(size_t x = 0; x < mLayer.front()->getLenght(); ++x)
         mLayer.front()->setValue(x, dat.at(x));
-    int i(0), j(0);
-    for(unsigned int x(1); x < mLayer.size(); ++x) {
-        for(unsigned int y(0); y < mLayer.at(x)->getLenght(); ++y) {
-            for(unsigned int z(0); z < mLayer.at(x - 1)->getLenght(); ++z)
+    unsigned int i = 0, j = 0;
+    for(size_t x = 1; x < mLayer.size(); ++x) {
+        for(size_t y = 0; y < mLayer.at(x)->getLenght(); ++y) {
+            for(size_t z = 0; z < mLayer.at(x - 1)->getLenght(); ++z)
                 mLayer.at(x)->setValue(y, mLayer.at(x)->getValue(y) + (mLayer.at(x - 1)->getSigmo(z) * mWeight.at(z + j).at(y)));
             mLayer.at(x)->setValue(y, mLayer.at(x)->getValue(y) - mBias.at(x - 1).at(y));
             ++i;
@@ -250,26 +248,26 @@ void Matrix::feedforward(vector<double> dat) {
 }
 
 void Matrix::backpropagation() {
-    for(unsigned int atLayer((unsigned int) mLayer.size() - 1); atLayer > 0; --atLayer) {
-        for(unsigned int atNeuron(0); atNeuron < mLayer.at(atLayer)->getLenght(); ++atNeuron)
-            for(unsigned int x(0); x < mLayer.at(atLayer - 1)->getLenght(); ++x) {
-                int i(0);
-                for(unsigned int y(0); y < atLayer - 1; ++y)
+    for(size_t atLayer(mLayer.size() - 1); atLayer > 0; --atLayer) {
+        for(size_t atNeuron = 0; atNeuron < mLayer.at(atLayer)->getLenght(); ++atNeuron)
+            for(size_t x = 0; x < mLayer.at(atLayer - 1)->getLenght(); ++x) {
+                size_t i = 0;
+                for(size_t y = 0; y < atLayer-1; ++y)
                     i += mLayer.at(y)->getLenght();
                 mDWeight.at(x + i).at(atNeuron) = (mRate * mLayer.at(atLayer - 1)->getSigmo(x) * mLayer.at(atLayer)->getSigma(atNeuron));
             }
     }
-    for(unsigned int x(0); x < mBias.size(); ++x) {
-        for(unsigned int y(0); y < mBias.at(x).size(); ++y)
+    for(size_t x = 0; x < mBias.size(); ++x) {
+        for(size_t y(0); y < mBias.at(x).size(); ++y)
             mDBias.at(x).at(y) = (mRate * -1 * mLayer.at(x + 1)->getSigma(y));
     }
 
-    for(unsigned int x(0); x < mWeight.size(); ++x) {
-        for(unsigned int y(0); y < mWeight.at(x).size(); ++y)
+    for(size_t x = 0; x < mWeight.size(); ++x) {
+        for(size_t y(0); y < mWeight.at(x).size(); ++y)
             mWeight.at(x).at(y) += mDWeight.at(x).at(y);
     }
-    for(unsigned int x(0); x < mBias.size(); ++x) {
-        for(unsigned int y(0); y < mBias.at(x).size(); ++y)
+    for(size_t x = 0; x < mBias.size(); ++x) {
+        for(size_t y = 0; y < mBias.at(x).size(); ++y)
             mBias.at(x).at(y) += mDBias.at(x).at(y);
     }
 }

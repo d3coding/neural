@@ -8,11 +8,11 @@ HLayer::HLayer(size_t nNeurons) {
     }
 }
 
-double HLayer::getValue(unsigned int at) {
+double HLayer::getValue(size_t at) {
     return neuron.at(at).getValue();
 }
 
-double HLayer::getSigma(unsigned int at) {
+double HLayer::getSigma(size_t at) {
     return neuron.at(at).getSigma();
 }
 
@@ -20,11 +20,11 @@ size_t HLayer::getLenght() {
     return (unsigned int) neuron.size();
 }
 
-void HLayer::setSigma(unsigned int at, double value) {
+void HLayer::setSigma(size_t at, double value) {
     neuron.at(at).setSigma(value);
 }
 
-void HLayer::setValue(unsigned int at, double value) {
+void HLayer::setValue(size_t at, double value) {
     neuron.at(at).setValue(value);
 }
 

@@ -13,16 +13,16 @@ class HLayer {
         neuron.clear();
     }
 
-    virtual double getSigmo(unsigned int at) {
+    virtual double getSigmo(size_t at) {
         return neuron.at(at).getSigmo();
     };
 
-    double getValue(unsigned int at);
-    double getSigma(unsigned int at);
+    double getValue(size_t at);
+    double getSigma(size_t at);
     size_t getLenght();
 
-    void setValue(unsigned int at, double value);
-    void setSigma(unsigned int at, double value);
+    void setValue(size_t at, double value);
+    void setSigma(size_t at, double value);
 
     vector<double> getOutput();
     protected:
@@ -31,8 +31,8 @@ class HLayer {
 
 class ILayer : public HLayer {
     public:
-    ILayer(unsigned int nNeurons) :HLayer(nNeurons) {}
-    virtual double getSigmo(unsigned int at) {
+    ILayer(size_t nNeurons) :HLayer(nNeurons) {}
+    virtual double getSigmo(size_t at) {
         return neuron.at(at).getValue();
     }
 };

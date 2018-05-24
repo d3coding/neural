@@ -22,12 +22,12 @@ class Matrix {
 
     static Matrix* useMatrixData(MatrixData mMatrix);
 
-    vector<double> getError(unsigned int atData);
+    vector<double> getError(size_t atData);
     vector<double> calculate(vector<double> input);
     MatrixData* getAllData();
     vector<double> genRand(unsigned int i);
 
-    void sigma(unsigned int dataPosition);
+    void sigma(size_t dataPosition);
     void addData(vector< vector<double> > newData);
     void setRate(double newRate);
 
