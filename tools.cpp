@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <chrono>
+#include <iomanip>
 
 Tools::~Tools() {
     if(m != NULL)
@@ -12,6 +13,7 @@ Tools::~Tools() {
 
 Matrix* Tools::useLogicGate(double ff, double ft, double tf, double tt) {
     Matrix *M = new Matrix(2, 1, 2, 1);
+    M->setRate(0.1);
     vector< vector< vector<double> > > data;
     for(int x(0); x < 4; ++x) {
         vector< vector<double> > a;
@@ -48,10 +50,13 @@ Matrix* Tools::useLogicGate(double ff, double ft, double tf, double tt) {
     return M;
 }
 
-void Tools::learn(unsigned int iterations) {
+int Tools::learn(unsigned int iterations) {
     if(iterations == 0) {
         cout << "# ERR # AS ITERACOES SAO 0!\n" << endl;
-        exit(1);
+        return -1;
+    } else if(m->getRate() <= 0) {
+        cout << "# ERR # A TAXA E 0!\n" << endl;
+        return -1;
     } else {
         auto start = chrono::system_clock::now();
         cout << "# Treinando...\n";
@@ -59,6 +64,7 @@ void Tools::learn(unsigned int iterations) {
         auto end = chrono::system_clock::now();
         cout << "# Sucesso ao treinar!...\n" << "# Tempo decorrido: " << (chrono::duration_cast<chrono::milliseconds>(end - start)).count() << "ms\n";
     }
+    return 0;
 }
 
 void Tools::logicCalc(bool logic) {
@@ -116,16 +122,17 @@ void Tools::printResult() {
             ++n;
         }
     }
+    streamsize dflt = cout.precision();
     cout << "Total:\t\t" << tot << endl;
-    cout << "Porcentagem:\t" << (100 * tot) / n << "%\n";
+    cout << setprecision(2) << "Porcentagem:\t" << (100 * tot) / n << "%\n" << setprecision(dflt);
 }
 
 void Tools::setMatrix(Matrix *newMatrix) {
     m = newMatrix;
 }
 
-Matrix* Tools::getMatrix() {
-    return m;
+Matrix Tools::getMatrix() {
+    return *m;
 }
 
 void Tools::final() {

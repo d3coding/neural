@@ -13,13 +13,13 @@ class Tools {
 
     static Matrix* useLogicGate(double ff, double ft, double tf, double tt);
 
-    void learn(unsigned int iterations);
+    int learn(unsigned int iterations);
     void logicCalc(bool logic = false);
     void printResult();
 
     void setMatrix(Matrix *newMatrix);
 
-    Matrix *getMatrix();
+    Matrix getMatrix();
 
     static void final();
 

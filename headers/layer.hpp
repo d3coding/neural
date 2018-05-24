@@ -7,7 +7,7 @@ using namespace std;
 
 class HLayer {
     public:
-    HLayer(unsigned int nNeurons);
+    HLayer(size_t nNeurons);
 
     virtual ~HLayer() {
         neuron.clear();
@@ -19,7 +19,8 @@ class HLayer {
 
     double getValue(unsigned int at);
     double getSigma(unsigned int at);
-    unsigned int getLenght();
+    size_t getLenght();
+
     void setValue(unsigned int at, double value);
     void setSigma(unsigned int at, double value);
 

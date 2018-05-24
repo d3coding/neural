@@ -5,47 +5,74 @@
 #include <cstdlib>
 #include <fstream>
 
-Matrix::Matrix(unsigned int nInput, unsigned int nHLayers, unsigned int nNperHLayers, unsigned int nOutput) {
-    for(unsigned int x(0); x < nHLayers; ++x)
+Matrix::Matrix(size_t nInput, size_t nHLayers, size_t nNperHLayers, size_t nOutput, bool gen) {
+    for(size_t x = 0; x < nHLayers; ++x)
         mLayer.push_back(new HLayer(nNperHLayers));
     mLayer.insert(mLayer.begin(), new ILayer(nInput));
     mLayer.insert(mLayer.end(), new HLayer(nOutput));
 
-    genP();
+    if(gen) genP(getWn() + getBn());
 }
 
-Matrix::Matrix(MatrixData *M) {
-    for(unsigned int x(0); x < M->nHLayers; ++x)
-        mLayer.push_back(new HLayer(M->nNperHLayers));
-    mLayer.insert(mLayer.begin(), new ILayer(M->nInput));
-    mLayer.insert(mLayer.end(), new HLayer(M->nOutput));
+Matrix* Matrix::useMatrixData(MatrixData mMatrix) {
+    cout << "Criando matrix atraves de dados..." << endl;
+    Matrix *m = new Matrix(mMatrix.nInput, mMatrix.nHLayers, mMatrix.nNperHLayers, mMatrix.nOutput, false);
 
-    genP();
+    if(m->setBias(mMatrix.Bias) < 0) {
+        cout << "# ERR # Error (Bias)" << endl;
+        delete m;
+        return NULL;
+    } else if(m->setWeight(mMatrix.Weight) < 0) {
+        cout << "# ERR # Error (Weight)" << endl;
+        delete m;
+        return NULL;
+    } else if(m->setData(mMatrix.Data) < 0) {
+        cout << "# ERR # Error (Data)" << endl;
+        delete m;
+        return NULL;
+    } else return m;
+}
 
-    mBias = M->Bias;
-    mWeight = M->Weight;
-    mData = M->Data;
+int Matrix::setWeight(vector< vector<double> > newWeight) {
+    cout << "# # Adicionando weight..." << endl;
+    if(newWeight.size() != getWn())
+        return -1;
 
-    for(unsigned int x(0); x < mWeight.size(); ++x) {
+    mWeight = newWeight;
+
+    for(size_t x = 0; x < mWeight.size(); ++x) {
         vector<double> a;
         mDWeight.push_back(a);
-        for(unsigned int y(0); y < mWeight.at(x).size(); ++y) {
+        for(size_t y = 0; y < mWeight.at(x).size(); ++y)
             mDWeight.back().push_back(0);
-        }
     }
-    for(unsigned int x(0); x < mBias.size(); ++x) {
+
+    return 0;
+}
+
+int Matrix::setBias(vector< vector<double> > newBias) {
+    cout << "# # Adicionando bias..." << endl;
+    if(newBias.size() != getBn())
+        return -1;
+
+    mBias = newBias;
+
+    for(size_t x = 0; x < mBias.size(); ++x) {
         vector<double> a;
         mDBias.push_back(a);
-        for(unsigned int y(0); y < mBias.at(x).size(); ++y) {
+        for(size_t y = 0; y < mBias.at(x).size(); ++y)
             mDBias.back().push_back(0);
-        }
     }
-    for(unsigned int x(0); x < mData.size(); ++x) {
-        vector<double> a;
-        mData.at(x).push_back(a);
-        for(unsigned int y(0); y < mLayer.back()->getLenght(); ++y)
-            mData.at(x).back().push_back(0);
-    }
+
+    return 0;
+}
+
+int Matrix::setData(vector< vector< vector<double> > > newData) {
+    return 0;
+}
+
+double Matrix::getRate() {
+    return mRate;
 }
 
 Matrix::~Matrix() {
@@ -138,10 +165,8 @@ void Matrix::setRate(double value) {
     mRate = value;
 }
 
-void Matrix::genP() {
-    unsigned int i(0);
-
-    // how may weights
+unsigned int Matrix::getWn() {
+    unsigned int i = 0;
     for(unsigned int x(0); x < mLayer.size() - 1; ++x) {
         for(unsigned int y(0); y < mLayer.at(x)->getLenght(); ++y) {
             for(unsigned int z(0); z < mLayer.at(x + 1)->getLenght(); ++z) {
@@ -149,18 +174,24 @@ void Matrix::genP() {
             }
         }
     }
+    return i;
+}
 
-    // how many bias
+unsigned int Matrix::getBn() {
+    unsigned int i = 0;
     for(unsigned int x(1); x < mLayer.size(); ++x) {
         for(unsigned int y(0); y < mLayer.at(x)->getLenght(); ++y) {
             i++;
         }
     }
+    return i;
+}
 
-    vector<double> vec = genRand(i);
+void Matrix::genP(unsigned int totalParam) {
+    vector<double> vec = genRand(totalParam);
 
-    for(unsigned int x(0); x < mLayer.size() - 1; ++x) {
-        for(unsigned int y(0); y < mLayer.at(x)->getLenght(); ++y) {
+    for(size_t x = 0; x < mLayer.size() - 1; ++x) {
+        for(size_t y = 0; y < mLayer.at(x)->getLenght(); ++y) {
             vector<double> a;
             vector<double> b;
             mWeight.push_back(a);
@@ -173,12 +204,12 @@ void Matrix::genP() {
         }
     }
 
-    for(unsigned int x(1); x < mLayer.size(); ++x) {
+    for(size_t x = 1; x < mLayer.size(); ++x) {
         vector<double> a;
         vector<double> b;
         mBias.push_back(a);
         mDBias.push_back(b);
-        for(unsigned int y(0); y < mLayer.at(x)->getLenght(); ++y) {
+        for(size_t y = 0; y < mLayer.at(x)->getLenght(); ++y) {
             mBias.back().push_back(vec.at(0));
             vec.erase(vec.begin());
             mDBias.back().push_back(0);

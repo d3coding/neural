@@ -1,7 +1,7 @@
 #include "headers/layer.hpp"
 #include <vector>
 
-HLayer::HLayer(unsigned int nNeurons) {
+HLayer::HLayer(size_t nNeurons) {
     for(unsigned int x(0); x < nNeurons; ++x) {
         Neuron mNeuron;
         neuron.push_back(mNeuron);
@@ -16,7 +16,7 @@ double HLayer::getSigma(unsigned int at) {
     return neuron.at(at).getSigma();
 }
 
-unsigned int HLayer::getLenght() {
+size_t HLayer::getLenght() {
     return (unsigned int) neuron.size();
 }
 
