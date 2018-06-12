@@ -1,4 +1,5 @@
 #include "headers/matrix.hpp"
+#include "headers/strings.h"
 #include <random>
 #include <vector>
 #include <iostream>
@@ -15,26 +16,26 @@ Matrix::Matrix(size_t nInput, size_t nHLayers, size_t nNperHLayers, size_t nOutp
 }
 
 Matrix* Matrix::useMatrixData(MatrixData mMatrix) {
-    cout << "Criando matrix atraves de dados..." << endl;
+    cout << TX0c00 << endl;
     Matrix *m = new Matrix(mMatrix.nInput, mMatrix.nHLayers, mMatrix.nNperHLayers, mMatrix.nOutput, false);
 
     if(m->setBias(mMatrix.Bias) < 0) {
-        cout << "# ERR # Error (Bias)" << endl;
+        cout << ERR0c00 << endl;
         delete m;
         return NULL;
     } else if(m->setWeight(mMatrix.Weight) < 0) {
-        cout << "# ERR # Error (Weight)" << endl;
+        cout << ERR0c01 << endl;
         delete m;
         return NULL;
     } else if(m->setData(mMatrix.Data) < 0) {
-        cout << "# ERR # Error (Data)" << endl;
+        cout << ERR0c02 << endl;
         delete m;
         return NULL;
     } else return m;
 }
 
 int Matrix::setWeight(vector< vector<double> > newWeight) {
-    cout << "# # Adicionando weight..." << endl;
+    cout << TX0c02 << endl;
     if(newWeight.size() != getWn())
         return -1;
 
@@ -51,7 +52,7 @@ int Matrix::setWeight(vector< vector<double> > newWeight) {
 }
 
 int Matrix::setBias(vector< vector<double> > newBias) {
-    cout << "# # Adicionando bias..." << endl;
+    cout << TX0c03 << endl;
     if(newBias.size() != getBn())
         return -1;
 
@@ -76,7 +77,7 @@ double Matrix::getRate() {
 }
 
 Matrix::~Matrix() {
-    for(unsigned int x(0); x < mLayer.size(); ++x)
+    for(size_t x = 0; x < mLayer.size(); ++x)
         delete mLayer.at(x);
     mWeight.clear();
     mDWeight.clear();
@@ -102,7 +103,7 @@ MatrixData* Matrix::getAllData() {
     MatrixData *dat = new MatrixData;
     {
         dat->nInput = mLayer.front()->getLenght();
-        dat->nHLayers = (unsigned int) (mLayer.size() - 2);
+        dat->nHLayers = (mLayer.size() - 2);
         dat->nNperHLayers = mLayer.at(1)->getLenght();
         dat->nOutput = mLayer.back()->getLenght();
     }
@@ -118,14 +119,14 @@ vector<double> Matrix::genRand(unsigned int i) {
     mt19937 gen(rd());
     uniform_real_distribution<> dis(-1, 1);
     vector<double> vec;
-    for(unsigned int x(0); x < i; ++x)
+    for(unsigned int x = 0; x < i; ++x)
         vec.push_back(dis(gen));
     return vec;
 }
 
 void Matrix::learnFor(unsigned int iterations) {
     for(unsigned int x = 0; x < iterations; ++x) {
-        for(unsigned int y = 0; y < mData.size(); ++y) {
+        for(size_t y = 0; y < mData.size(); ++y) {
             feedforward(mData.at(y).at(0));
             sigma(y);
             backpropagation();
@@ -140,7 +141,7 @@ void Matrix::sigma(size_t dataPosition) {
     }
     for(size_t x(mLayer.size() - 2); x > 0; --x) {
         size_t i = 0;
-        for(unsigned int y(0); y < x; ++y)
+        for(unsigned int y = 0; y < x; ++y)
             i += mLayer.at(y)->getLenght();
         for(size_t y = 0; y < mLayer.at(x)->getLenght(); ++y) {
             double j(0);
@@ -194,7 +195,7 @@ void Matrix::genP(unsigned int totalParam) {
             vector<double> b;
             mWeight.push_back(a);
             mDWeight.push_back(b);
-            for(unsigned int z(0); z < mLayer.at(x + 1)->getLenght(); ++z) {
+            for(unsigned int z = 0; z < mLayer.at(x + 1)->getLenght(); ++z) {
                 mWeight.back().push_back(vec.at(0));
                 vec.erase(vec.begin());
                 mDWeight.back().push_back(0);

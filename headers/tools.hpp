@@ -7,7 +7,7 @@ using namespace std;
 
 class Tools {
     public:
-    Tools(unsigned int a, unsigned int b, unsigned int c, unsigned int d) : m(new Matrix(a, b, c, d)) {}
+    Tools(size_t a, size_t b, size_t c, size_t d) : m(new Matrix(a, b, c, d)) {}
     Tools(Matrix *M) :m(M) {}
     ~Tools();
 

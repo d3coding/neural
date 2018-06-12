@@ -1,5 +1,4 @@
-#ifndef NEURON_H
-#define NEURON_H
+#pragma once
 
 #include <cmath>
 
@@ -25,4 +24,3 @@ class Neuron {
     double value, S;
 };
 
-#endif // NEURON_H
