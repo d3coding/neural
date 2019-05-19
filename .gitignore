@@ -1,1 +1,6 @@
-main.cpp
+.vs
+Debug/
+x64/
+NeuralNetCS/bin/
+NeuralNetCS/x64/
+NeuralNetCS/obj/

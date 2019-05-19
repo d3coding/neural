@@ -111,7 +111,7 @@ void Tools::printResult() {
             cout << TX1c16 << x << "):\t" << tmp->Data.at(x).at(1).at(y) << "\t";
         cout << "\n";
         for(size_t y = 0; y < tmp->nOutput; ++y)
-            cout << TX1c17 << x << "):\t" << tmp->Data.at(x).at(1).at(y) - tmp->Data.at(x).back().at(y) << "\t";
+            cout << TX1c17 << x << "):\t" << abs(tmp->Data.at(x).at(1).at(y) - tmp->Data.at(x).back().at(y)) << "\t";
         cout << "\n";
     }
     cout << TX1c13;
