@@ -11,9 +11,9 @@ The project was also refactored in C # ([Neural-CS](https://github.com/mateusjde
 # License
 
 ```
-MIT License
+The MIT License (MIT)
 
-Copyright (c) 2020 mateusjdev
+Copyright (c) 2020 Mateus J.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
